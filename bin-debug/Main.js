@@ -71,25 +71,109 @@ var Main = (function (_super) {
             this.loadingView.setProgress(event.itemsLoaded, event.itemsTotal);
         }
     };
-    /**
-     * 创建游戏场景
-     * Create a game scene
-     */
+    p.showPanel = function (task, buttonText) {
+        Main.content1.x = 100;
+        Main.content1.y = 600;
+        Main.content1.text = "任务名称: " + task.getName();
+        Main.content2.x = 200;
+        Main.content2.y = 650;
+        Main.content2.text = "发布任务NPC: " + task.getFromNpcId();
+        Main.content3.x = 200;
+        Main.content3.y = 700;
+        Main.content3.text = "完成任务NPC: " + task.getToNpcId();
+        Main.content4.x = 200;
+        Main.content4.y = 750;
+        Main.content4.text = "任务状态： " + task.getStatus();
+        if (buttonText == "accept") {
+            Main.button.x = 300;
+            Main.button.y = 800;
+            Main.button.text = "接受";
+            Main.button.touchEnabled = true;
+            Main.button.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                TaskService.getInstance().accept(task.getId());
+                Main.button.text = "";
+            }, this);
+        }
+        else if (buttonText == "finish") {
+            Main.button.x = 300;
+            Main.button.y = 800;
+            Main.button.text = "完成";
+            Main.button.touchEnabled = true;
+            Main.button.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                TaskService.getInstance().finish(task.getId());
+                Main.button.text = "";
+            }, this);
+        }
+    };
+    p.showEmoji = function (emoji) {
+        if (emoji == "yellow !") {
+            Main.n0Emoji.text = "黄色叹号";
+            Main.n0Emoji.x = 40;
+            Main.n0Emoji.y = 220;
+            Main.n0Emoji.size = 20;
+            Main.n0Emoji.textColor = 0xFFFF00;
+        }
+        else if (emoji == "yellow ?") {
+            Main.n0Emoji.text = "";
+            Main.n1Emoji.text = "黄色问号";
+            Main.n1Emoji.x = 340;
+            Main.n1Emoji.y = 530;
+            Main.n1Emoji.size = 20;
+            Main.n1Emoji.textColor = 0xFFFF00;
+        }
+        else if (emoji == "") {
+            Main.n0Emoji.text = "";
+            Main.n1Emoji.text = "";
+        }
+    };
     p.createGameScene = function () {
-        var NPC1 = new NPC("1");
-        var NPC2 = new NPC("2");
-        var taskPanel = new TaskPanel();
-        var task = new Task("1", "探索地图，找到隐藏的NPC", TaskStatus.CANACCEPTED, NPC1, NPC2);
+        this.touchEnabled = true;
+        var NPC0 = new NPC("npc_0");
+        var NPC1 = new NPC("npc_1");
+        var taskPanel = new TaskPanel("dialogpanel");
+        var taskAllTimePanel = new TaskPanel("taskpanel");
         var taskService = TaskService.getInstance();
+        var task = new Task("0", "探索地图，找到隐藏的NPC", TaskStatus.ACCEPTABLE, "npc_0", "npc_1");
+        var N0 = this.createBitmapByName("NPC_jpg");
+        N0.width = 156;
+        N0.height = 198;
+        N0.touchEnabled = true;
+        N0.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+            Main.click = true;
+            TaskService.getInstance().notify(task);
+        }, this);
+        this.addChild(N0);
+        var N1 = this.createBitmapByName("NPC_jpg");
+        N1.x = 300;
+        N1.y = 300;
+        N1.width = 156;
+        N1.height = 198;
+        N1.touchEnabled = true;
+        N1.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+            Main.click = true;
+            TaskService.getInstance().notify(task);
+        }, this);
+        this.addChild(N1);
+        this.addChild(Main.n0Emoji);
+        this.addChild(Main.n1Emoji);
+        this.addChild(Main.content1);
+        this.addChild(Main.content2);
+        this.addChild(Main.content3);
+        this.addChild(Main.content4);
+        this.addChild(Main.button);
+        taskService.addObserver(NPC0);
         taskService.addObserver(NPC1);
-        taskService.addObserver(NPC2);
         taskService.addObserver(taskPanel);
+        taskService.addObserver(taskAllTimePanel);
         taskService.addTask(task);
-        //假设玩家进行了能够改变任务状态的操作,告诉被观察者先做相关处理
-        taskService.deal(task);
-        taskService.deal(task);
-        taskService.deal(task);
-        taskService.deal(task);
+        taskService.getTaskByCustomRule(function (taskList) {
+            for (var i = 0; i < taskList.length; i++) {
+                if (taskList[i].getStatus() == TaskStatus.ACCEPTABLE) {
+                    taskService.notify(taskList[i]);
+                    return taskList[i];
+                }
+            }
+        });
     };
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
@@ -139,6 +223,19 @@ var Main = (function (_super) {
     p.touchNPC1 = function (evt) {
         console.log("click");
     };
+    /**
+     * 创建游戏场景
+     * Create a game scene
+     */
+    //任务面板的ui
+    Main.content1 = new egret.TextField();
+    Main.content2 = new egret.TextField();
+    Main.content3 = new egret.TextField();
+    Main.content4 = new egret.TextField();
+    Main.button = new egret.TextField();
+    //emoji
+    Main.n0Emoji = new egret.TextField();
+    Main.n1Emoji = new egret.TextField();
     return Main;
 }(egret.DisplayObjectContainer));
 egret.registerClass(Main,'Main');

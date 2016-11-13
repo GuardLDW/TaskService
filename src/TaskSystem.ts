@@ -3,22 +3,24 @@ class Task{
 
     private id : String;
 
-    private name : String;
+    private name : string;
+
+    private desc : String;
 
     private status : TaskStatus;
 
-    private comefromNPC : NPC;
+    private fromNpcId : String;
 
-    private goforNPC : NPC;
+    private toNpcId : String;
 
 
-    constructor(id : String, name : String, status : TaskStatus, comefromNPC : NPC, goforNPC : NPC){
+    constructor(id : String, name : string, status : TaskStatus, fromNpcId : String, toNpcId : String){
 
         this.id = id;
         this.name = name;
         this.status = status;
-        this.comefromNPC = comefromNPC;
-        this.goforNPC = goforNPC;
+        this.fromNpcId = fromNpcId;
+        this.toNpcId = toNpcId;
 
     }
 
@@ -28,7 +30,7 @@ class Task{
         return this.id;
     }
 
-    public getName() : String{
+    public getName() : string{
 
         return this.name;
     }
@@ -38,14 +40,14 @@ class Task{
         return this.status;
     }
 
-    public getComefromNPC() : NPC{
+    public getFromNpcId() : String{
 
-        return this.comefromNPC;
+        return this.fromNpcId;
     }
 
-    public getGoforNPC() : NPC{
+    public getToNpcId() : String{
 
-        return this.goforNPC;
+        return this.toNpcId;
     }
 
     public setStatus(taskStatus : TaskStatus) : void{
@@ -59,15 +61,15 @@ class Task{
 
 enum TaskStatus{
 
-    UNACCEPTED,
+    UNACCEPTABLE = 0,
 
-    CANACCEPTED,
+    ACCEPTABLE = 1,
 
-    DURING,
+    DURING = 2,
 
-    CANCOMPLETE,
+    CANSUBMIT = 3,
 
-    ALREAYCOMPLETE
+    SUBMITTED = 4
 
 }
 
@@ -89,10 +91,8 @@ class TaskService{
     private static instance : TaskService;
     private static count = 0;
 
-    private taskList : Task[] = [];
-    private observerList : Observer[] = [];
-
-    private currentTask : Task;
+    public taskList : Task[] = [];
+    public observerList : Observer[] = [];
 
 
     constructor(){
@@ -123,6 +123,8 @@ class TaskService{
 
         //拷贝数据
         var clone = this.taskList;
+
+        //为传入函数增加了参数
         return rule(clone);
 
     }
@@ -139,41 +141,43 @@ class TaskService{
         this.observerList.push(observer);
     }
 
+    //完成任务时调用
+    public finish(id : String) : ErrorCode{
 
-    //被观察者状态改变时调用
-    deal(task : Task) : void{
+        for(var i = 0; i < this.taskList.length; i++){
 
-        this.currentTask = task;
-        
+            if(this.taskList[i].getId() == id){
 
-        //由任务服务站进行任务状态的改变,不由外部直接改变状态
-        //任务状态更加深入
-        if(this.currentTask.getStatus() == TaskStatus.UNACCEPTED){
-
-            this.currentTask.setStatus(TaskStatus.CANACCEPTED);
-            
-        }else if(this.currentTask.getStatus() == TaskStatus.CANACCEPTED){
-
-            this.currentTask.setStatus(TaskStatus.DURING);
-
-        }else if(this.currentTask.getStatus() == TaskStatus.DURING){
-
-            this.currentTask.setStatus(TaskStatus.CANCOMPLETE);
-
-        }else if(this.currentTask.getStatus() == TaskStatus.CANCOMPLETE){
-
-            this.currentTask.setStatus(TaskStatus.ALREAYCOMPLETE);
-
+                this.taskList[i].setStatus(TaskStatus.SUBMITTED);
+                this.notify(this.taskList[i]);
+                break;
+            }
         }
 
-        //被观察者状态改变，通知观察者做改变，即调用各个观察者的onChange方法
-        this.notify(this.currentTask);
+        return ErrorCode.SUCCESS;
     }
 
-    
+
+    //接受任务时调用
+    public accept(id : String) : void{
+
+        for(var i = 0; i < this.taskList.length; i++){
+
+            if(this.taskList[i].getId() == id){
+
+
+                this.taskList[i].setStatus(TaskStatus.DURING);
+                this.notify(this.taskList[i]);
+                break;
+            }
+        }
+
+    }
+
+
     //将任务发送给所有观察者,并让观察者进行相应的处理
     //只能内部调用
-    private notify(task : Task){
+    public notify(task : Task){
 
         for(var i = 0; i < this.observerList.length; i++){
 
@@ -187,31 +191,7 @@ class TaskService{
 
 class TaskPanel implements Observer{
 
-    private currentTask : Task;
-
-
-    onChange(task : Task){
-
-        this.currentTask = task;
-
-        //将任务信息显示在面板上
-        console.log("id: " + this.currentTask.getId());
-        console.log("name: " + this.currentTask.getName());
-        console.log("status: " + this.currentTask.getStatus());
-        console.log("comefromNPC: " + this.currentTask.getComefromNPC().getId());
-        console.log("goforNPC: " + this.currentTask.getGoforNPC().getId());
-        
-
-    }
-}
-
-
-class NPC implements Observer{
-
     private id : String;
-    
-    //头顶的提示任务状态的符号
-    private headInfo : String;
 
     constructor(id : String){
 
@@ -224,39 +204,99 @@ class NPC implements Observer{
     }
 
 
-    //根据变化的任务的相应状态改变NPC头顶的符号
     onChange(task : Task){
 
-        if(task.getStatus() == TaskStatus.ALREAYCOMPLETE){
+        if(this.id = "taskAllPanel"){
 
-            console.log("headInfo: ALREAYCOMPLETE");
-
-        }else if(task.getStatus() == TaskStatus.CANACCEPTED){
-
-            console.log("headInfo: !");
-
-        }else if(task.getStatus() == TaskStatus.UNACCEPTED){
-
-            console.log("headInfo: UNACCEPTED");
-
-        }else if(task.getStatus() == TaskStatus.DURING){
-
-            console.log("headInfo: ?(white)");
-
-        }else if(task.getStatus() == TaskStatus.CANCOMPLETE){
-
-            console.log("headInfo: ?(yellow)")
+            new Main().showPanel(task, "always");
         }
 
+        if(task.getStatus() == TaskStatus.ACCEPTABLE && Main.click){
+
+            new Main().showPanel(task, "accept");
+
+        }else if(task.getStatus() == TaskStatus.DURING ){
+
+            new Main().showPanel(task, "finish")
+        }
+
+        Main.click = false;
+
+    }
+}
+
+
+class NPC implements Observer{
+
+    private id : String;
+    
+    //头顶的提示任务状态的符号
+    private emoji : String;
+
+
+
+    constructor(id : String){
+
+        this.id = id;
+    }
+
+    public getId() : String{
+
+        return this.id;
+    }
+
+    public setEmoji(emoji : String){
+
+        this.emoji = emoji;
     }
 
 
+    //根据变化的任务的相应状态改变相应NPC头顶的符号
+    onChange(task : Task){
+
+        //任务刚创建时
+        if(task.getStatus() == TaskStatus.ACCEPTABLE){
 
 
+            if(this.id == task.getFromNpcId()){
+
+                this.emoji = "yellow !";
+
+            }
+
+        }else if(task.getStatus() == TaskStatus.DURING){
+
+            if(this.id == task.getFromNpcId()){
+
+
+                this.emoji = "";
+            }
+
+            if(this.id == task.getToNpcId()){
+
+                this.emoji = "yellow ?";
+
+            }
+
+        }else if(task.getStatus() == TaskStatus.SUBMITTED){
+
+            this.emoji = "";
+        }
+
+        new Main().showEmoji(this.emoji);
+
+    }
+    
 }
+
+
+
+
+
 
 interface Observer{
 
     //接受到信息后进行相应的处理，信息作为参数可以是任意事物，如task等
     onChange(object : any);
+
 }

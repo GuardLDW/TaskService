@@ -1,10 +1,10 @@
 var Task = (function () {
-    function Task(id, name, status, comefromNPC, goforNPC) {
+    function Task(id, name, status, fromNpcId, toNpcId) {
         this.id = id;
         this.name = name;
         this.status = status;
-        this.comefromNPC = comefromNPC;
-        this.goforNPC = goforNPC;
+        this.fromNpcId = fromNpcId;
+        this.toNpcId = toNpcId;
     }
     var d = __define,c=Task,p=c.prototype;
     p.getId = function () {
@@ -16,11 +16,11 @@ var Task = (function () {
     p.getStatus = function () {
         return this.status;
     };
-    p.getComefromNPC = function () {
-        return this.comefromNPC;
+    p.getFromNpcId = function () {
+        return this.fromNpcId;
     };
-    p.getGoforNPC = function () {
-        return this.goforNPC;
+    p.getToNpcId = function () {
+        return this.toNpcId;
     };
     p.setStatus = function (taskStatus) {
         this.status = taskStatus;
@@ -30,11 +30,11 @@ var Task = (function () {
 egret.registerClass(Task,'Task');
 var TaskStatus;
 (function (TaskStatus) {
-    TaskStatus[TaskStatus["UNACCEPTED"] = 0] = "UNACCEPTED";
-    TaskStatus[TaskStatus["CANACCEPTED"] = 1] = "CANACCEPTED";
+    TaskStatus[TaskStatus["UNACCEPTABLE"] = 0] = "UNACCEPTABLE";
+    TaskStatus[TaskStatus["ACCEPTABLE"] = 1] = "ACCEPTABLE";
     TaskStatus[TaskStatus["DURING"] = 2] = "DURING";
-    TaskStatus[TaskStatus["CANCOMPLETE"] = 3] = "CANCOMPLETE";
-    TaskStatus[TaskStatus["ALREAYCOMPLETE"] = 4] = "ALREAYCOMPLETE";
+    TaskStatus[TaskStatus["CANSUBMIT"] = 3] = "CANSUBMIT";
+    TaskStatus[TaskStatus["SUBMITTED"] = 4] = "SUBMITTED";
 })(TaskStatus || (TaskStatus = {}));
 var ErrorCode;
 (function (ErrorCode) {
@@ -62,6 +62,7 @@ var TaskService = (function () {
     p.getTaskByCustomRule = function (rule) {
         //拷贝数据
         var clone = this.taskList;
+        //为传入函数增加了参数
         return rule(clone);
     };
     p.addTask = function (task) {
@@ -70,25 +71,26 @@ var TaskService = (function () {
     p.addObserver = function (observer) {
         this.observerList.push(observer);
     };
-    //被观察者状态改变时调用
-    p.deal = function (task) {
-        this.currentTask = task;
-        //由任务服务站进行任务状态的改变,不由外部直接改变状态
-        //任务状态更加深入
-        if (this.currentTask.getStatus() == TaskStatus.UNACCEPTED) {
-            this.currentTask.setStatus(TaskStatus.CANACCEPTED);
+    //完成任务时调用
+    p.finish = function (id) {
+        for (var i = 0; i < this.taskList.length; i++) {
+            if (this.taskList[i].getId() == id) {
+                this.taskList[i].setStatus(TaskStatus.SUBMITTED);
+                this.notify(this.taskList[i]);
+                break;
+            }
         }
-        else if (this.currentTask.getStatus() == TaskStatus.CANACCEPTED) {
-            this.currentTask.setStatus(TaskStatus.DURING);
+        return ErrorCode.SUCCESS;
+    };
+    //接受任务时调用
+    p.accept = function (id) {
+        for (var i = 0; i < this.taskList.length; i++) {
+            if (this.taskList[i].getId() == id) {
+                this.taskList[i].setStatus(TaskStatus.DURING);
+                this.notify(this.taskList[i]);
+                break;
+            }
         }
-        else if (this.currentTask.getStatus() == TaskStatus.DURING) {
-            this.currentTask.setStatus(TaskStatus.CANCOMPLETE);
-        }
-        else if (this.currentTask.getStatus() == TaskStatus.CANCOMPLETE) {
-            this.currentTask.setStatus(TaskStatus.ALREAYCOMPLETE);
-        }
-        //被观察者状态改变，通知观察者做改变，即调用各个观察者的onChange方法
-        this.notify(this.currentTask);
     };
     //将任务发送给所有观察者,并让观察者进行相应的处理
     //只能内部调用
@@ -102,17 +104,24 @@ var TaskService = (function () {
 }());
 egret.registerClass(TaskService,'TaskService');
 var TaskPanel = (function () {
-    function TaskPanel() {
+    function TaskPanel(id) {
+        this.id = id;
     }
     var d = __define,c=TaskPanel,p=c.prototype;
+    p.getId = function () {
+        return this.id;
+    };
     p.onChange = function (task) {
-        this.currentTask = task;
-        //将任务信息显示在面板上
-        console.log("id: " + this.currentTask.getId());
-        console.log("name: " + this.currentTask.getName());
-        console.log("status: " + this.currentTask.getStatus());
-        console.log("comefromNPC: " + this.currentTask.getComefromNPC().getId());
-        console.log("goforNPC: " + this.currentTask.getGoforNPC().getId());
+        if (this.id = "taskAllPanel") {
+            new Main().showPanel(task, "always");
+        }
+        if (task.getStatus() == TaskStatus.ACCEPTABLE && Main.click) {
+            new Main().showPanel(task, "accept");
+        }
+        else if (task.getStatus() == TaskStatus.DURING) {
+            new Main().showPanel(task, "finish");
+        }
+        Main.click = false;
     };
     return TaskPanel;
 }());
@@ -125,25 +134,31 @@ var NPC = (function () {
     p.getId = function () {
         return this.id;
     };
-    //根据变化的任务的相应状态改变NPC头顶的符号
+    p.setEmoji = function (emoji) {
+        this.emoji = emoji;
+    };
+    //根据变化的任务的相应状态改变相应NPC头顶的符号
     p.onChange = function (task) {
-        if (task.getStatus() == TaskStatus.ALREAYCOMPLETE) {
-            console.log("headInfo: ALREAYCOMPLETE");
-        }
-        else if (task.getStatus() == TaskStatus.CANACCEPTED) {
-            console.log("headInfo: !");
-        }
-        else if (task.getStatus() == TaskStatus.UNACCEPTED) {
-            console.log("headInfo: UNACCEPTED");
+        //任务刚创建时
+        if (task.getStatus() == TaskStatus.ACCEPTABLE) {
+            if (this.id == task.getFromNpcId()) {
+                this.emoji = "yellow !";
+            }
         }
         else if (task.getStatus() == TaskStatus.DURING) {
-            console.log("headInfo: ?(white)");
+            if (this.id == task.getFromNpcId()) {
+                this.emoji = "";
+            }
+            if (this.id == task.getToNpcId()) {
+                this.emoji = "yellow ?";
+            }
         }
-        else if (task.getStatus() == TaskStatus.CANCOMPLETE) {
-            console.log("headInfo: ?(yellow)");
+        else if (task.getStatus() == TaskStatus.SUBMITTED) {
+            this.emoji = "";
         }
+        new Main().showEmoji(this.emoji);
     };
     return NPC;
 }());
 egret.registerClass(NPC,'NPC',["Observer"]);
-//# sourceMappingURL=Task.js.map
+//# sourceMappingURL=TaskSystem.js.map
