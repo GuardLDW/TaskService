@@ -97,36 +97,76 @@ class Main extends egret.DisplayObjectContainer {
 
 
 
-    //任务面板的ui
+    //对话任务面板的ui
     public static content1 = new egret.TextField();
     public static content2 = new egret.TextField();
     public static content3 = new egret.TextField();
     public static content4 = new egret.TextField();
     public static button = new egret.TextField();
 
+    public static taskPanelContent1 = new egret.TextField();
+    public static taskPanelContent2 = new egret.TextField();
+    public static taskPanelContent3 = new egret.TextField();
+    public static taskPanelContent4 = new egret.TextField();
+
     //emoji
     public static n0Emoji = new egret.TextField();
     public static n1Emoji = new egret.TextField();
 
-    public showPanel(task : Task, buttonText : String){
+    public showPanel(task : Task, tag : String){
 
-        Main.content1.x = 100;
-        Main.content1.y = 600;
-        Main.content1.text = "任务名称: " + task.getName();
+        if(tag == "taskpanel not accept" || tag == "taskpanel submit"){
 
-        Main.content2.x = 200;
-        Main.content2.y = 650;
-        Main.content2.text = "发布任务NPC: " + task.getFromNpcId();
+            Main.taskPanelContent1.x = 300;
+            Main.taskPanelContent1.y = 50;
+            Main.taskPanelContent1.size = 20;
+            Main.taskPanelContent1.text = "无进行中的任务";
 
-        Main.content3.x = 200;
-        Main.content3.y = 700;
-        Main.content3.text = "完成任务NPC: " + task.getToNpcId();
+            Main.taskPanelContent2.text = "";
+            Main.taskPanelContent3.text = "";
+            Main.taskPanelContent4.text = "";
 
-        Main.content4.x = 200;
-        Main.content4.y = 750;
-        Main.content4.text = "任务状态： " + task.getStatus();
+        }else if(tag == "taskpanel accept"){
 
-        if(buttonText == "accept"){
+            Main.taskPanelContent1.x = 300;
+            Main.taskPanelContent1.y = 50;
+            Main.taskPanelContent1.size = 20;
+            Main.taskPanelContent1.text = "任务名称: " + task.getName();
+
+            Main.taskPanelContent2.x = 300;
+            Main.taskPanelContent2.y = 100;
+            Main.taskPanelContent2.size = 20;
+            Main.taskPanelContent2.text = "发布任务NPC: " + task.getFromNpcId();
+
+            Main.taskPanelContent3.x = 300;
+            Main.taskPanelContent3.y = 150;
+            Main.taskPanelContent3.size = 20;
+            Main.taskPanelContent3.text = "完成任务NPC: " + task.getToNpcId();
+
+            Main.taskPanelContent4.x = 300;
+            Main.taskPanelContent4.y = 200;
+            Main.taskPanelContent4.size = 20;
+            Main.taskPanelContent4.text = "任务状态： " + task.getStatus();
+
+        }
+
+        if(tag == "accept"){
+
+            Main.content1.x = 100;
+            Main.content1.y = 600;
+            Main.content1.text = "任务名称: " + task.getName();
+
+            Main.content2.x = 200;
+            Main.content2.y = 650;
+            Main.content2.text = "发布任务NPC: " + task.getFromNpcId();
+
+            Main.content3.x = 200;
+            Main.content3.y = 700;
+            Main.content3.text = "完成任务NPC: " + task.getToNpcId();
+
+            Main.content4.x = 200;
+            Main.content4.y = 750;
+            Main.content4.text = "任务状态： " + task.getStatus();
             
             Main.button.x = 300;
             Main.button.y = 800;
@@ -137,10 +177,30 @@ class Main extends egret.DisplayObjectContainer {
                 
                 TaskService.getInstance().accept(task.getId());
                 Main.button.text = "";
+                Main.content1.text = "";
+                Main.content2.text = "";
+                Main.content3.text = "";
+                Main.content4.text = "";
 
             },this);
    
-        }else if(buttonText == "finish"){
+        }else if(tag == "finish"){
+
+            Main.content1.x = 100;
+            Main.content1.y = 600;
+            Main.content1.text = "任务名称: " + task.getName();
+
+            Main.content2.x = 200;
+            Main.content2.y = 650;
+            Main.content2.text = "发布任务NPC: " + task.getFromNpcId();
+
+            Main.content3.x = 200;
+            Main.content3.y = 700;
+            Main.content3.text = "完成任务NPC: " + task.getToNpcId();
+
+            Main.content4.x = 200;
+            Main.content4.y = 750;
+            Main.content4.text = "任务状态： " + task.getStatus();
 
             Main.button.x = 300;
             Main.button.y = 800;
@@ -151,6 +211,10 @@ class Main extends egret.DisplayObjectContainer {
                 
                 TaskService.getInstance().finish(task.getId());
                 Main.button.text = "";
+                Main.content1.text = "";
+                Main.content2.text = "";
+                Main.content3.text = "";
+                Main.content4.text = "";
 
             },this);
         }
@@ -236,6 +300,11 @@ class Main extends egret.DisplayObjectContainer {
         this.addChild(Main.content3);
         this.addChild(Main.content4);
         this.addChild(Main.button);
+
+        this.addChild(Main.taskPanelContent1);
+        this.addChild(Main.taskPanelContent2);
+        this.addChild(Main.taskPanelContent3);
+        this.addChild(Main.taskPanelContent4);
 
 
 

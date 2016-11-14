@@ -141,8 +141,17 @@ class TaskService{
         this.observerList.push(observer);
     }
 
+    //public removeObserver(observer : Observer){}
+    //public removeTask(task : Task){}
+
+
     //完成任务时调用
     public finish(id : String) : ErrorCode{
+
+        if(id == ""){
+
+            return ErrorCode.MISSING_TASK;
+        }
 
         for(var i = 0; i < this.taskList.length; i++){
 
@@ -163,8 +172,7 @@ class TaskService{
 
         for(var i = 0; i < this.taskList.length; i++){
 
-            if(this.taskList[i].getId() == id){
-
+            if(this.taskList[i].getId() == id && this.taskList[i].getStatus() == TaskStatus.ACCEPTABLE){
 
                 this.taskList[i].setStatus(TaskStatus.DURING);
                 this.notify(this.taskList[i]);
@@ -206,9 +214,19 @@ class TaskPanel implements Observer{
 
     onChange(task : Task){
 
-        if(this.id = "taskAllPanel"){
+        if(task.getStatus() == TaskStatus.ACCEPTABLE){
 
-            new Main().showPanel(task, "always");
+            new Main().showPanel(task, "taskpanel not accept");
+        }
+
+        if(task.getStatus() == TaskStatus.DURING){
+
+            new Main().showPanel(task, "taskpanel accept");
+        }
+
+        if(task.getStatus() == TaskStatus.SUBMITTED){
+
+            new Main().showPanel(task, "taskpanel submit");
         }
 
         if(task.getStatus() == TaskStatus.ACCEPTABLE && Main.click){
@@ -233,8 +251,6 @@ class NPC implements Observer{
     //头顶的提示任务状态的符号
     private emoji : String;
 
-
-
     constructor(id : String){
 
         this.id = id;
@@ -256,7 +272,6 @@ class NPC implements Observer{
 
         //任务刚创建时
         if(task.getStatus() == TaskStatus.ACCEPTABLE){
-
 
             if(this.id == task.getFromNpcId()){
 

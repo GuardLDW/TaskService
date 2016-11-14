@@ -71,8 +71,13 @@ var TaskService = (function () {
     p.addObserver = function (observer) {
         this.observerList.push(observer);
     };
+    //public removeObserver(observer : Observer){}
+    //public removeTask(task : Task){}
     //完成任务时调用
     p.finish = function (id) {
+        if (id == "") {
+            return ErrorCode.MISSING_TASK;
+        }
         for (var i = 0; i < this.taskList.length; i++) {
             if (this.taskList[i].getId() == id) {
                 this.taskList[i].setStatus(TaskStatus.SUBMITTED);
@@ -85,7 +90,7 @@ var TaskService = (function () {
     //接受任务时调用
     p.accept = function (id) {
         for (var i = 0; i < this.taskList.length; i++) {
-            if (this.taskList[i].getId() == id) {
+            if (this.taskList[i].getId() == id && this.taskList[i].getStatus() == TaskStatus.ACCEPTABLE) {
                 this.taskList[i].setStatus(TaskStatus.DURING);
                 this.notify(this.taskList[i]);
                 break;
@@ -112,8 +117,14 @@ var TaskPanel = (function () {
         return this.id;
     };
     p.onChange = function (task) {
-        if (this.id = "taskAllPanel") {
-            new Main().showPanel(task, "always");
+        if (task.getStatus() == TaskStatus.ACCEPTABLE) {
+            new Main().showPanel(task, "taskpanel not accept");
+        }
+        if (task.getStatus() == TaskStatus.DURING) {
+            new Main().showPanel(task, "taskpanel accept");
+        }
+        if (task.getStatus() == TaskStatus.SUBMITTED) {
+            new Main().showPanel(task, "taskpanel submit");
         }
         if (task.getStatus() == TaskStatus.ACCEPTABLE && Main.click) {
             new Main().showPanel(task, "accept");
