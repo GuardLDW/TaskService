@@ -68,4 +68,20 @@ var TaskPanel = (function () {
     return TaskPanel;
 }());
 egret.registerClass(TaskPanel,'TaskPanel',["Observer"]);
+var KillButton = (function () {
+    function KillButton() {
+        this.killAmount = 0;
+    }
+    var d = __define,c=KillButton,p=c.prototype;
+    p.onChange = function () {
+        this.killAmount++;
+        for (var i = 0; i < TaskService.getInstance().taskList.length; i++) {
+            if (TaskService.getInstance().taskList[i].condition == "kill") {
+                new KillMonsterTaskCondition().onAccept(TaskService.getInstance().taskList[i]);
+            }
+        }
+    };
+    return KillButton;
+}());
+egret.registerClass(KillButton,'KillButton',["Observer"]);
 //# sourceMappingURL=Observer.js.map

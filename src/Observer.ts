@@ -121,8 +121,25 @@ class TaskPanel implements Observer{
                
             }
         }
+    }
+ 
+}
 
+
+class KillButton implements Observer{
+
+    private killAmount = 0;
+
+    onChange(){
+
+        this.killAmount++;
+        for(var i = 0; i < TaskService.getInstance().taskList.length; i++){
+
+            if(TaskService.getInstance().taskList[i].condition == "kill"){
+
+                new KillMonsterTaskCondition().onAccept(TaskService.getInstance().taskList[i]); 
+            }
+        }
         
-
     }
 }

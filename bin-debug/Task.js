@@ -8,6 +8,12 @@ var Task = (function () {
         this.fromNpcId = fromNpcId;
         this.toNpcId = toNpcId;
         this.condition = condition;
+        if (condition == "talk") {
+            this.total = -1;
+        }
+        else if (condition == "kill") {
+            this.total = 10;
+        }
     }
     var d = __define,c=Task,p=c.prototype;
     p.getId = function () {
@@ -39,8 +45,8 @@ var Task = (function () {
     p.checkStatus = function () {
         if (this.status == TaskStatus.DURING && this.current >= this.total) {
             this.status = TaskStatus.CANSUBMIT;
+            TaskService.getInstance().notify(this);
         }
-        TaskService.getInstance().notify(this);
     };
     return Task;
 }());
@@ -53,32 +59,6 @@ var TaskStatus;
     TaskStatus[TaskStatus["CANSUBMIT"] = 3] = "CANSUBMIT";
     TaskStatus[TaskStatus["SUBMITTED"] = 4] = "SUBMITTED";
 })(TaskStatus || (TaskStatus = {}));
-var NPCTalkTaskCondition = (function () {
-    function NPCTalkTaskCondition() {
-    }
-    var d = __define,c=NPCTalkTaskCondition,p=c.prototype;
-    //Task与TaskConditionContext的区别
-    //不想让NPCTalkTaskCondition得到task的所有信息
-    p.onAccept = function (context) {
-        context.setCurrent();
-    };
-    p.onSubmit = function () {
-    };
-    return NPCTalkTaskCondition;
-}());
-egret.registerClass(NPCTalkTaskCondition,'NPCTalkTaskCondition',["TaskCondition"]);
-var KillMonsterTaskCondition = (function () {
-    function KillMonsterTaskCondition() {
-    }
-    var d = __define,c=KillMonsterTaskCondition,p=c.prototype;
-    p.onAccept = function (context) {
-        context.setCurrent();
-    };
-    p.onSubmit = function () {
-    };
-    return KillMonsterTaskCondition;
-}());
-egret.registerClass(KillMonsterTaskCondition,'KillMonsterTaskCondition',["TaskCondition"]);
 var ErrorCode;
 (function (ErrorCode) {
     ErrorCode[ErrorCode["SUCCESS"] = 0] = "SUCCESS";

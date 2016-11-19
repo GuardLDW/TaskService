@@ -82,7 +82,7 @@ var Main = (function (_super) {
             Main.taskPanelContent3.text = "";
             Main.taskPanelContent4.text = "";
         }
-        else if (tag == "taskpanel accept0" || tag == "taskpanel cansubmit0") {
+        else if (tag == "taskpanel acceptted0" || tag == "taskpanel cansubmit0") {
             Main.taskPanelContent1.x = 300;
             Main.taskPanelContent1.y = 50;
             Main.taskPanelContent1.size = 20;
@@ -109,7 +109,7 @@ var Main = (function (_super) {
             Main.taskPanelContent3.text = "";
             Main.taskPanelContent4.text = "";
         }
-        else if (tag == "taskpanel accept1" || tag == "taskpanel cansubmit1") {
+        else if (tag == "taskpanel acceptted1" || tag == "taskpanel cansubmit1") {
             Main.taskPanelContent1.x = 300;
             Main.taskPanelContent1.y = 50;
             Main.taskPanelContent1.size = 20;
@@ -198,6 +198,7 @@ var Main = (function (_super) {
             Main.dialogPanelButton.text = "接受";
             Main.dialogPanelButton.touchEnabled = true;
             Main.dialogPanelButton.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                Main.n1Emoji.text = "";
                 Main.dialogPanelButton.text = "";
                 Main.dialogPanelContent1.text = "";
                 Main.dialogPanelContent2.text = "";
@@ -287,8 +288,8 @@ var Main = (function (_super) {
         var taskPanel = new TaskPanel("dialogpanel");
         var taskAllTimePanel = new TaskPanel("taskpanel");
         var taskService = TaskService.getInstance();
-        var task = new Task("0", "将消息传递给另一个NPC", TaskStatus.ACCEPTABLE, "npc_0", "npc_1", new NPCTalkTaskCondition());
-        var task1 = new Task("1", "杀10只怪", TaskStatus.UNACCEPTABLE, "npc_1", "npc_0", new NPCTalkTaskCondition());
+        var task = new Task("0", "将消息传递给另一个NPC", TaskStatus.ACCEPTABLE, "npc_0", "npc_1", "talk");
+        var task1 = new Task("1", "杀10只怪", TaskStatus.UNACCEPTABLE, "npc_1", "npc_0", "kill");
         var N0 = this.createBitmapByName("NPC_jpg");
         N0.width = 156;
         N0.height = 198;
@@ -311,6 +312,18 @@ var Main = (function (_super) {
             TaskService.getInstance().notify(task1);
         }, this);
         this.addChild(N1);
+        var killButton = new KillButton();
+        var sceneService = SceneService.getInstance();
+        sceneService.addObserver(killButton);
+        var killButtonText = new egret.TextField();
+        killButtonText.x = 200;
+        killButtonText.y = 1000;
+        killButtonText.text = "杀怪";
+        killButtonText.touchEnabled = true;
+        killButtonText.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+            sceneService.notify();
+        }, this);
+        this.addChild(killButtonText);
         this.addChild(Main.n0Emoji);
         this.addChild(Main.n1Emoji);
         this.addChild(Main.dialogPanelContent1);

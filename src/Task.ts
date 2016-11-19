@@ -17,10 +17,10 @@ class Task implements TaskConditionContext{
 
     public total : number = -1;
 
-    public condition : TaskCondition;
+    public condition : String;
 
 
-    constructor(id : String, name : string, status : TaskStatus, fromNpcId : String, toNpcId : String, condition : TaskCondition){
+    constructor(id : String, name : string, status : TaskStatus, fromNpcId : String, toNpcId : String, condition : String){
 
         this.id = id;
         this.name = name;
@@ -28,6 +28,14 @@ class Task implements TaskConditionContext{
         this.fromNpcId = fromNpcId;
         this.toNpcId = toNpcId;
         this.condition = condition;
+        if(condition == "talk"){
+
+            this.total = -1;
+
+        }else if(condition == "kill"){
+
+            this.total = 10;
+        }
 
     }
 
@@ -80,8 +88,9 @@ class Task implements TaskConditionContext{
         if(this.status == TaskStatus.DURING && this.current >= this.total){
 
             this.status = TaskStatus.CANSUBMIT;
+            TaskService.getInstance().notify(this);
         }
-        TaskService.getInstance().notify(this);
+        
     }
 
 
@@ -104,51 +113,7 @@ enum TaskStatus{
 
 
 
-interface TaskCondition{
 
-    onAccept(task : Task);
-
-    onSubmit();
-
-}
-
-
-class NPCTalkTaskCondition implements TaskCondition{
-
-    
-    //Task与TaskConditionContext的区别
-    //不想让NPCTalkTaskCondition得到task的所有信息
-    onAccept(context : TaskConditionContext){
-
-        context.setCurrent();
-    }
-
-    onSubmit(){
-        
-    }
-}
-
-class KillMonsterTaskCondition implements TaskCondition{
-
-    onAccept(context : TaskConditionContext){
-
-        context.setCurrent();
-    }
-
-    onSubmit(){
-        
-    }
-
-
-}
-
-
-interface TaskConditionContext{
-
-    getCurrent();
-
-    setCurrent();
-}
 
 
 

@@ -102,7 +102,16 @@ class TaskService{
             if(this.taskList[i].getId() == id && this.taskList[i].getStatus() == TaskStatus.ACCEPTABLE){
 
                 this.taskList[i].setStatus(TaskStatus.DURING);
-                new NPCTalkTaskCondition().onAccept(this.taskList[i]);
+                
+                if(this.taskList[i].condition == "talk"){
+
+                    new NPCTalkTaskCondition().onAccept(this.taskList[i]);
+
+                }else if(this.taskList[i].condition == "kill"){
+
+                    new KillMonsterTaskCondition().onAccept(this.taskList[i]);
+                }
+                
                 this.notify(this.taskList[i]);
   
                 break;
