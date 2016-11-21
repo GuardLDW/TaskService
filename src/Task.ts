@@ -94,6 +94,57 @@ class Task implements TaskConditionContext{
     }
 
 
+    //接受任务
+    public onAccept(){
+
+            if(this.getStatus() == TaskStatus.ACCEPTABLE){
+
+                this.setStatus(TaskStatus.DURING);
+                
+                if(this.condition == "talk"){
+
+                    new NPCTalkTaskCondition().onAccept(this);
+
+                }else if(this.condition == "kill"){
+
+                    new KillMonsterTaskCondition().onAccept(this);
+                }
+                
+                TaskService.getInstance().notify(this);
+  
+            }
+        }
+
+
+    //完成任务
+    public onSubmit() : ErrorCode{
+
+        if(this.id == ""){
+
+            return ErrorCode.MISSING_TASK;
+        }
+
+            if(this.getStatus() == TaskStatus.CANSUBMIT){
+
+                this.setStatus(TaskStatus.SUBMITTED);
+                TaskService.getInstance().notify(this);
+
+                //将下一个任务设为可完成
+                for(var i = 0; i < TaskService.getInstance().taskList.length - 1; i++){
+
+                    if(this.id == TaskService.getInstance().taskList[i].getId()){
+                        
+                        TaskService.getInstance().taskList[i+1].setStatus(TaskStatus.ACCEPTABLE);
+                        TaskService.getInstance().notify(TaskService.getInstance().taskList[i+1]);
+                        break;
+                    }
+                }
+        }
+
+        return ErrorCode.SUCCESS;
+    }
+
+
 }    
 
 

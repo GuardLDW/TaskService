@@ -6,7 +6,6 @@ interface Observer{
 }
 
 
-
 class NPC implements Observer{
 
     private id : String;

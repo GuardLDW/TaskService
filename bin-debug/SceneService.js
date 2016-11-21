@@ -17,6 +17,11 @@ var SceneService = (function () {
     p.addObserver = function (observer) {
         this.observerList.push(observer);
     };
+    p.removeObserver = function (observer) {
+        //排序
+        //.....
+        this.observerList.pop;
+    };
     p.notify = function () {
         for (var i = 0; i < this.observerList.length; i++) {
             this.observerList[i].onChange(1);
@@ -25,5 +30,5 @@ var SceneService = (function () {
     SceneService.count = 0;
     return SceneService;
 }());
-egret.registerClass(SceneService,'SceneService');
+egret.registerClass(SceneService,'SceneService',["EventEmitter"]);
 //# sourceMappingURL=SceneService.js.map

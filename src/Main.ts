@@ -217,7 +217,7 @@ class Main extends egret.DisplayObjectContainer {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().accept(task.getId());
+                task.onAccept();
 
 
             },this);
@@ -251,7 +251,7 @@ class Main extends egret.DisplayObjectContainer {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().finish(task.getId());
+                task.onSubmit();
 
 
             },this);
@@ -288,7 +288,8 @@ class Main extends egret.DisplayObjectContainer {
             Main.dialogPanelContent2.text = "";
             Main.dialogPanelContent3.text = "";
             Main.dialogPanelContent4.text = "";
-            TaskService.getInstance().accept(task.getId());
+            task.onAccept();
+
         },this);
 
     }else if(tag == "finish1"){
@@ -320,7 +321,7 @@ class Main extends egret.DisplayObjectContainer {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().finish(task.getId());
+                task.onSubmit();
             },this);
     }
 

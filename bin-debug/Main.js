@@ -151,7 +151,7 @@ var Main = (function (_super) {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().accept(task.getId());
+                task.onAccept();
             }, this);
         }
         else if (tag == "finish0") {
@@ -177,7 +177,7 @@ var Main = (function (_super) {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().finish(task.getId());
+                task.onSubmit();
             }, this);
         }
         if (tag == "accept1") {
@@ -204,7 +204,7 @@ var Main = (function (_super) {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().accept(task.getId());
+                task.onAccept();
             }, this);
         }
         else if (tag == "finish1") {
@@ -230,7 +230,7 @@ var Main = (function (_super) {
                 Main.dialogPanelContent2.text = "";
                 Main.dialogPanelContent3.text = "";
                 Main.dialogPanelContent4.text = "";
-                TaskService.getInstance().finish(task.getId());
+                task.onSubmit();
             }, this);
         }
     };
@@ -321,6 +321,7 @@ var Main = (function (_super) {
         killButtonText.text = "杀怪";
         killButtonText.touchEnabled = true;
         killButtonText.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+            //相当于杀了怪
             sceneService.notify();
         }, this);
         this.addChild(killButtonText);

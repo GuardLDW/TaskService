@@ -1,4 +1,4 @@
-class TaskService{
+class TaskService implements EventEmitter{
 
 
     //全局变量，一个模块最多一个（任务系统等）
@@ -55,69 +55,18 @@ class TaskService{
         this.observerList.push(observer);
     }
 
+
+    public removeObserver(observer : Observer){
+
+        //排序
+        //.....
+        this.observerList.pop;
+    }
+
     //public removeObserver(observer : Observer){}
     public removeTask(task : Task){
 
         this.taskList.pop;
-    }
-
-
-    //完成任务时调用
-    public finish(id : String) : ErrorCode{
-
-        if(id == ""){
-
-            return ErrorCode.MISSING_TASK;
-        }
-
-        for(var i = 0; i < this.taskList.length; i++){
-
-            if(this.taskList[i].getId() == id && this.taskList[i].getStatus() == TaskStatus.CANSUBMIT){
-
-                this.taskList[i].setStatus(TaskStatus.SUBMITTED);
-                this.notify(this.taskList[i]);
-
-                //将下一个任务设为可完成
-                if(i < this.taskList.length - 1){
-
-                    this.taskList[i+1].setStatus(TaskStatus.ACCEPTABLE);
-                    this.notify(this.taskList[i+1]);
-                }
-
-                break;
-            }
-            
-
-        }
-
-        return ErrorCode.SUCCESS;
-    }
-
-
-    //接受任务时调用
-    public accept(id : String) : void{
-
-        for(var i = 0; i < this.taskList.length; i++){
-
-            if(this.taskList[i].getId() == id && this.taskList[i].getStatus() == TaskStatus.ACCEPTABLE){
-
-                this.taskList[i].setStatus(TaskStatus.DURING);
-                
-                if(this.taskList[i].condition == "talk"){
-
-                    new NPCTalkTaskCondition().onAccept(this.taskList[i]);
-
-                }else if(this.taskList[i].condition == "kill"){
-
-                    new KillMonsterTaskCondition().onAccept(this.taskList[i]);
-                }
-                
-                this.notify(this.taskList[i]);
-  
-                break;
-            }
-        }
-
     }
 
 

@@ -1,4 +1,4 @@
-class SceneService{
+class SceneService implements EventEmitter{
 
     private static instance : SceneService;
     private static count = 0;
@@ -30,6 +30,13 @@ class SceneService{
     public addObserver(observer : Observer){
 
         this.observerList.push(observer);
+    }
+
+    public removeObserver(observer : Observer){
+
+        //排序
+        //.....
+        this.observerList.pop;
     }
 
 

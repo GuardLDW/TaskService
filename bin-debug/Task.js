@@ -48,6 +48,38 @@ var Task = (function () {
             TaskService.getInstance().notify(this);
         }
     };
+    //接受任务
+    p.onAccept = function () {
+        if (this.getStatus() == TaskStatus.ACCEPTABLE) {
+            this.setStatus(TaskStatus.DURING);
+            if (this.condition == "talk") {
+                new NPCTalkTaskCondition().onAccept(this);
+            }
+            else if (this.condition == "kill") {
+                new KillMonsterTaskCondition().onAccept(this);
+            }
+            TaskService.getInstance().notify(this);
+        }
+    };
+    //完成任务
+    p.onSubmit = function () {
+        if (this.id == "") {
+            return ErrorCode.MISSING_TASK;
+        }
+        if (this.getStatus() == TaskStatus.CANSUBMIT) {
+            this.setStatus(TaskStatus.SUBMITTED);
+            TaskService.getInstance().notify(this);
+            //将下一个任务设为可完成
+            for (var i = 0; i < TaskService.getInstance().taskList.length - 1; i++) {
+                if (this.id == TaskService.getInstance().taskList[i].getId()) {
+                    TaskService.getInstance().taskList[i + 1].setStatus(TaskStatus.ACCEPTABLE);
+                    TaskService.getInstance().notify(TaskService.getInstance().taskList[i + 1]);
+                    break;
+                }
+            }
+        }
+        return ErrorCode.SUCCESS;
+    };
     return Task;
 }());
 egret.registerClass(Task,'Task',["TaskConditionContext"]);
